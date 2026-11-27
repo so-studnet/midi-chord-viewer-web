@@ -1,5 +1,6 @@
 import type { ChordResult } from './chordAnalyzer'
 import type { ChordTemplate, NotationStyle } from './chordTemplates'
+import { spellBass } from './chordSpelling'
 import { intervalName } from './intervals'
 import { pitchClassOf } from './noteNames'
 import { accidentals, spellPitchClass, type AccidentalStyle, type Key } from './spelling'
@@ -39,7 +40,7 @@ export function formatChordName(r: ChordResult, opts: FormatOptions): string {
 export function chordSymbol(root: number, template: ChordTemplate, bass: number, opts: FormatOptions): string {
   const { key, style = 'unicode', notation = 'standard' } = opts
   let label = spellPitchClass(root, key, style) + suffix(template, style, notation)
-  if (pitchClassOf(bass) !== pitchClassOf(root)) label += '/' + spellPitchClass(bass, key, style)
+  if (pitchClassOf(bass) !== pitchClassOf(root)) label += '/' + spellBass(root, template.mask, bass, key, style)
   return label
 }
 

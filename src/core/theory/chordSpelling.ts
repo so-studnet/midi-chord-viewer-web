@@ -53,3 +53,15 @@ function letterOffset(interval: number, has: (i: number) => boolean): number {
       return 6
   }
 }
+
+/**
+ * 分数コードのベース音の書き方。ベースが構成音なら構成音と同じ書き方（B♭aug7 の 7th は A♭）、
+ * 構成音でなければキーに合わせた書き方（Daug/G♯ の G♯）。
+ */
+export function spellBass(root: number, mask: number, bass: number, key: Key | null, style: AccidentalStyle = 'unicode'): string {
+  const interval = pitchClassOf(bass - root)
+  if ((mask & (1 << interval)) === 0) return spellPitchClass(bass, key, style)
+  let index = 0
+  for (let i = 0; i < interval; i++) if (mask & (1 << i)) index++
+  return spellChordTones(root, mask, key, style)[index]
+}
