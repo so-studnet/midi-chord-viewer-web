@@ -1,0 +1,66 @@
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --text: #1c1f24;
+  --muted: #69707a;
+  --border: #d5d9df;
+  --accent: #2f6fe0;
+  --key-white: #ffffff;
+  --key-black: #22252a;
+  --pressed: #4f8cff;
+  --pressed-black: #2f6fe0;
+  --sustained: #b9d0ff;
+  --sustained-black: #6f8fc9;
+  --error: #c4372c;
+  color-scheme: light dark;
+  font-family: system-ui, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171b;
+    --panel: #1e2126;
+    --text: #e7e9ec;
+    --muted: #9aa1ab;
+    --border: #353a42;
+    --key-white: #f2f3f5;
+    --key-black: #0c0d0f;
+    --error: #ff7a6e;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); }
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--border);
+}
+.toolbar h1 { font-size: 16px; margin: 0 8px 0 0; }
+.field { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+select, button { font: inherit; font-size: 14px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+.sound { display: inline-flex; align-items: center; gap: 12px; }
+.muted { color: var(--muted); font-size: 13px; }
+.notice { margin: 0; font-size: 14px; }
+.notice.error { color: var(--error); }
+main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 20px; }
+.chord { text-align: center; min-height: 150px; }
+.chord-label { font-size: clamp(48px, 9vw, 96px); font-weight: 700; line-height: 1.15; letter-spacing: 0.01em; }
+.chord.kind-interval .chord-label, .chord.kind-unresolved .chord-label { font-size: clamp(28px, 5vw, 48px); padding-top: 24px; }
+.chord.kind-none .chord-label { color: var(--muted); }
+.chord-notes { color: var(--muted); font-size: 16px; margin-top: 4px; }
+.keyboard-wrap { width: 100%; max-width: 1300px; overflow-x: auto; }
+.keyboard { width: 100%; min-width: 860px; height: auto; display: block; }
+.key rect { stroke: #555a62; stroke-width: 1; }
+.key.white rect { fill: var(--key-white); }
+.key.black rect { fill: var(--key-black); }
+.key.white.pressed rect { fill: var(--pressed); }
+.key.white.sustained rect { fill: var(--sustained); }
+.key.black.pressed rect { fill: var(--pressed-black); }
+.key.black.sustained rect { fill: var(--sustained-black); }
+.key text { font-size: 10px; font-weight: 600; fill: #1c1f24; pointer-events: none; }
+.key.black text { fill: #fff; font-size: 9px; }
+.key text.octave { fill: #8a9099; font-weight: 400; }
+.pedal { font-size: 13px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; }
+.pedal[data-on='true'] { color: #fff; background: var(--accent); border-color: var(--accent); }
+footer { padding: 10px 20px; font-size: 12px; color: var(--muted); text-align: center; }
+footer a { color: inherit; }
