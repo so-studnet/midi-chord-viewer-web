@@ -3,8 +3,16 @@ import golden from './__fixtures__/java-golden.json'
 import { analyzeChord } from './chordAnalyzer'
 import { formatChordName } from './format'
 
-/** Java 版と同じ書き方（♯ だけ・ASCII） */
+/** Java 版と同じ書き方（キーなし = ♯ 系・ASCII） */
 const javaLabel = (notes: number[]) => formatChordName(analyzeChord(notes), { key: null, style: 'ascii' })
+
+const PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
+/**
+ * 分数コードのベース音を半音の番号に置き換える。Web 版はベースが構成音なら構成音の書き方（C7(b9)/Db）、
+ * Java 版はいつも ♯（C7(b9)/C#）なので、書き方の違いだけは比べない。
+ */
+const bassAsNumber = (label: string) =>
+  label.replace(/\/([A-G])([#b]?)/, (_, l: string, a: string) => '/' + ((PC[l] + (a === '#' ? 1 : a === 'b' ? -1 : 0) + 12) % 12))
 
 describe('analyzeChord', () => {
   it.each([
@@ -32,7 +40,12 @@ describe('analyzeChord', () => {
 
   it(`Java 版と違う結果になるのは、Web 版で追加した種類に判定されたときだけ（${golden.length} 通り）`, () => {
     const unexpected = golden
-      .map(({ notes, label }) => ({ notes, expected: label, actual: javaLabel(notes), result: analyzeChord(notes) }))
+      .map(({ notes, label }) => ({
+        notes,
+        expected: bassAsNumber(label),
+        actual: bassAsNumber(javaLabel(notes)),
+        result: analyzeChord(notes),
+      }))
       .filter((c) => c.expected !== c.actual)
       .filter((c) => !(c.result.kind === 'chord' && c.result.template.addedInWeb))
       .map(({ notes, expected, actual }) => ({ notes, expected, actual }))

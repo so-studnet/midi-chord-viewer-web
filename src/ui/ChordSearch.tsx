@@ -1,9 +1,9 @@
 import { previewChord } from '../app/services'
 import { parseChordSymbol } from '../core/theory/chordParser'
 import { CHORD_TEMPLATES, type NotationStyle } from '../core/theory/chordTemplates'
-import { spellChordTones } from '../core/theory/chordSpelling'
+import { spellBass, spellChordTones } from '../core/theory/chordSpelling'
 import { chordSymbol, degreeSymbol } from '../core/theory/format'
-import { keyName, spellPitchClass, type Key } from '../core/theory/spelling'
+import { keyName, type Key } from '../core/theory/spelling'
 import { chordVoicing } from '../core/theory/voicing'
 import { KeyboardView } from './KeyboardView'
 import { MusicText } from './MusicText'
@@ -69,7 +69,7 @@ export function ChordSearch({ keyTonic, notation, query, onQueryChange: setQuery
               構成音: <MusicText text={spellChordTones(chord.root, chord.template.mask, spellKey).join(' ')} />
               {chord.bass !== chord.root && (
                 <span className="muted">
-                  （ベース <MusicText text={spellPitchClass(chord.bass, spellKey)} />）
+                  （ベース <MusicText text={spellBass(chord.root, chord.template.mask, chord.bass, spellKey)} />）
                 </span>
               )}
             </div>
