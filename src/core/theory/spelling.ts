@@ -53,5 +53,5 @@ export function keyName(key: Key, style: AccidentalStyle = 'unicode'): string {
 /** 音名・コードの表記の #/b を記法に合わせて書き換える（音名の直後か括弧内のテンションだけ） */
 export function accidentals(text: string, style: AccidentalStyle): string {
   if (style === 'ascii') return text
-  return text.replace(/([A-G])#/g, '$1♯').replace(/([A-G])b/g, '$1♭').replace(/\(#/g, '(♯').replace(/\(b/g, '(♭')
+  return text.replace(/([A-G])#/g, '$1♯').replace(/([A-G])b/g, '$1♭').replace(/([(,])#/g, '$1♯').replace(/([(,])b/g, '$1♭')
 }

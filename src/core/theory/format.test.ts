@@ -65,6 +65,30 @@ describe('formatDegree', () => {
     expect(deg([60, 64], 0)).toBeNull()
   })
   it('近似候補は (?)', () => {
-    expect(deg([60, 61, 64, 67], 0)?.endsWith('(?)')).toBe(true)
+    expect(deg([60, 63, 64, 67], 0)).toBe('I7(♯9)(?)')
+  })
+})
+
+describe('記法', () => {
+  const c = (notes: number[], notation: 'standard' | 'japanese' | 'jazz', tonic: number | null = 0) =>
+    formatChordName(analyzeChord(notes), { key: tonic === null ? null : key(tonic), notation })
+  it.each([
+    [[60, 64, 67, 71], 'Cmaj7', 'CM7', 'C△7'],
+    [[60, 63, 67, 70], 'Cm7', 'Cm7', 'C-7'],
+    [[59, 62, 65, 69], 'Bm7-5', 'Bm7(♭5)', 'Bø7'],
+    [[60, 63, 67, 71], 'Cm(maj7)', 'CmM7', 'C-△7'],
+    [[60, 63, 66, 69], 'Cdim7', 'Cdim7', 'C°7'],
+    [[60, 64, 68], 'Caug', 'Caug', 'C+'],
+    [[60, 62, 64, 67, 69], 'C6/9', 'C69', 'C6/9'],
+    [[60, 61, 64, 67, 69, 70], 'C7(♭9,13)', 'C7(♭9,13)', 'C7(♭9,13)'],
+    [[60, 63, 64, 67, 68, 70], 'C7(♯9,♭13)', 'C7(♯9,♭13)', 'C7(♯9,♭13)'],
+  ])('%j → %s / %s / %s', (notes, standard, japanese, jazz) => {
+    expect(c(notes, 'standard')).toBe(standard)
+    expect(c(notes, 'japanese')).toBe(japanese)
+    expect(c(notes, 'jazz')).toBe(jazz)
+  })
+  it('度数も記法に合わせる', () => {
+    expect(formatDegree(analyzeChord([62, 65, 69, 72]), key(0), 'unicode', 'jazz')).toBe('II-7')
+    expect(formatDegree(analyzeChord([65, 69, 72, 76]), key(0), 'unicode', 'japanese')).toBe('IVM7')
   })
 })

@@ -15,10 +15,12 @@ interface Props {
   sounding: ReadonlySet<number>
   physical: ReadonlySet<number>
   keyTonic: number | null
+  /** 色分け。search は検索結果用の色 */
+  variant?: 'play' | 'search'
 }
 
 /** SVG で描く鍵盤。押している鍵は濃い色、ペダルで伸びているだけの音は薄い色 */
-export const KeyboardView = memo(function KeyboardView({ sounding, physical, keyTonic }: Props) {
+export const KeyboardView = memo(function KeyboardView({ sounding, physical, keyTonic, variant = 'play' }: Props) {
   const key = keyTonic === null ? null : { tonic: keyTonic }
   const name = (n: number) => formatNoteName(n, { key })
   const whites: { note: number; x: number }[] = []
@@ -32,7 +34,7 @@ export const KeyboardView = memo(function KeyboardView({ sounding, physical, key
   const state = (n: number) => (physical.has(n) ? 'pressed' : sounding.has(n) ? 'sustained' : '')
 
   return (
-    <svg className="keyboard" viewBox={`0 0 ${width} ${WHITE_H}`} role="img" aria-label="鍵盤">
+    <svg className={`keyboard ${variant}`} viewBox={`0 0 ${width} ${WHITE_H}`} role="img" aria-label="鍵盤">
       {whites.map(({ note, x }) => (
         <g key={note} className={`key white ${state(note)}`} data-note={note}>
           <rect x={x + 0.5} y={0.5} width={WHITE_W - 1} height={WHITE_H - 1} rx={3} />

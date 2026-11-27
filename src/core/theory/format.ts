@@ -1,5 +1,5 @@
 import type { ChordResult } from './chordAnalyzer'
-import type { ChordTemplate } from './chordTemplates'
+import type { ChordTemplate, NotationStyle } from './chordTemplates'
 import { intervalName } from './intervals'
 import { pitchClassOf } from './noteNames'
 import { accidentals, spellPitchClass, type AccidentalStyle, type Key } from './spelling'
@@ -8,6 +8,8 @@ export interface FormatOptions {
   /** null なら Java 版と同じく ♯ だけで書く */
   readonly key: Key | null
   readonly style?: AccidentalStyle
+  /** コードの種類の書き方（既定は標準。Java 版と同じ） */
+  readonly notation?: NotationStyle
 }
 
 /** MIDI ノート番号 → "C4" / "B♭3" */
@@ -17,7 +19,6 @@ export function formatNoteName(midiNote: number, { key, style = 'unicode' }: For
 
 /** 判定結果 → 画面に出すコード名など（Java 版の表示と同じ書式） */
 export function formatChordName(r: ChordResult, opts: FormatOptions): string {
-  const { key, style = 'unicode' } = opts
   switch (r.kind) {
     case 'none':
       return '-'
@@ -28,11 +29,18 @@ export function formatChordName(r: ChordResult, opts: FormatOptions): string {
     case 'unresolved':
       return '該当コードなし'
     case 'chord': {
-      let label = spellPitchClass(r.root, key, style) + suffix(r.template, style)
-      if (r.bass !== r.root) label += '/' + spellPitchClass(r.bass, key, style)
+      const label = chordSymbol(r.root, r.template, r.bass, opts)
       return r.approximate ? label + '(?)' : label
     }
   }
+}
+
+/** ルート・種類・ベース → コード名（例: "B♭m7/F"） */
+export function chordSymbol(root: number, template: ChordTemplate, bass: number, opts: FormatOptions): string {
+  const { key, style = 'unicode', notation = 'standard' } = opts
+  let label = spellPitchClass(root, key, style) + suffix(template, style, notation)
+  if (pitchClassOf(bass) !== pitchClassOf(root)) label += '/' + spellPitchClass(bass, key, style)
+  return label
 }
 
 const ROMAN = ['I', 'bII', 'II', 'bIII', 'III', 'IV', '#IV', 'V', 'bVI', 'VI', 'bVII', 'VII'] as const
@@ -47,13 +55,31 @@ export function romanDegree(interval: number, style: AccidentalStyle = 'unicode'
  * 度数表記（ディグリー）。コードでなければ null。
  * 例: キー C で Dm7 → "IIm7"、G7/B → "V7/VII"、B♭ → "♭VII"
  */
-export function formatDegree(r: ChordResult, key: Key, style: AccidentalStyle = 'unicode'): string | null {
+export function formatDegree(
+  r: ChordResult,
+  key: Key,
+  style: AccidentalStyle = 'unicode',
+  notation: NotationStyle = 'standard',
+): string | null {
   if (r.kind !== 'chord') return null
-  let label = romanDegree(r.root - key.tonic, style) + suffix(r.template, style)
-  if (r.bass !== r.root) label += '/' + romanDegree(r.bass - key.tonic, style)
+  const label = degreeSymbol(r.root, r.template, r.bass, key, style, notation)
   return r.approximate ? label + '(?)' : label
 }
 
-function suffix(t: ChordTemplate, style: AccidentalStyle): string {
-  return accidentals(t.suffix, style)
+/** ルート・種類・ベース → 度数表記（例: "IIm7/VI"） */
+export function degreeSymbol(
+  root: number,
+  template: ChordTemplate,
+  bass: number,
+  key: Key,
+  style: AccidentalStyle = 'unicode',
+  notation: NotationStyle = 'standard',
+): string {
+  let label = romanDegree(root - key.tonic, style) + suffix(template, style, notation)
+  if (pitchClassOf(bass) !== pitchClassOf(root)) label += '/' + romanDegree(bass - key.tonic, style)
+  return label
+}
+
+function suffix(t: ChordTemplate, style: AccidentalStyle, notation: NotationStyle): string {
+  return accidentals(t.names[notation], style)
 }
