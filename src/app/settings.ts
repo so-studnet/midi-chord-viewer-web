@@ -8,10 +8,12 @@ export interface Settings {
   volume: number
   keyMode: KeyMode
   notation: NotationStyle
+  /** 5 度圏に弾いている音の点を出す */
+  circleNotes: boolean
 }
 
 const KEY = 'midi-chord-viewer:settings:v1'
-const DEFAULTS: Settings = { deviceName: null, soundEnabled: true, volume: 0.8, keyMode: { mode: 'auto' }, notation: 'standard' }
+const DEFAULTS: Settings = { deviceName: null, soundEnabled: true, volume: 0.8, keyMode: { mode: 'auto' }, notation: 'standard', circleNotes: false }
 
 export function loadSettings(): Settings {
   try {
@@ -23,6 +25,7 @@ export function loadSettings(): Settings {
       soundEnabled: typeof v.soundEnabled === 'boolean' ? v.soundEnabled : DEFAULTS.soundEnabled,
       volume: typeof v.volume === 'number' && v.volume >= 0 && v.volume <= 1 ? v.volume : DEFAULTS.volume,
       keyMode: parseKeyMode(v.keyMode),
+      circleNotes: typeof v.circleNotes === 'boolean' ? v.circleNotes : DEFAULTS.circleNotes,
       notation: NOTATION_STYLES.some((n) => n.id === v.notation) ? (v.notation as NotationStyle) : DEFAULTS.notation,
     }
   } catch {
