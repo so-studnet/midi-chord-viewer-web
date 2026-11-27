@@ -1,3 +1,4 @@
+import { NOTATION_STYLES, type NotationStyle } from '../core/theory/chordTemplates'
 import type { KeyMode } from './keyStore'
 
 /** 端末ごとの設定（ブラウザ内に保存。読めなくても動くようにする） */
@@ -6,10 +7,11 @@ export interface Settings {
   soundEnabled: boolean
   volume: number
   keyMode: KeyMode
+  notation: NotationStyle
 }
 
 const KEY = 'midi-chord-viewer:settings:v1'
-const DEFAULTS: Settings = { deviceName: null, soundEnabled: true, volume: 0.8, keyMode: { mode: 'auto' } }
+const DEFAULTS: Settings = { deviceName: null, soundEnabled: true, volume: 0.8, keyMode: { mode: 'auto' }, notation: 'standard' }
 
 export function loadSettings(): Settings {
   try {
@@ -21,6 +23,7 @@ export function loadSettings(): Settings {
       soundEnabled: typeof v.soundEnabled === 'boolean' ? v.soundEnabled : DEFAULTS.soundEnabled,
       volume: typeof v.volume === 'number' && v.volume >= 0 && v.volume <= 1 ? v.volume : DEFAULTS.volume,
       keyMode: parseKeyMode(v.keyMode),
+      notation: NOTATION_STYLES.some((n) => n.id === v.notation) ? (v.notation as NotationStyle) : DEFAULTS.notation,
     }
   } catch {
     return DEFAULTS

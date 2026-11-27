@@ -3,7 +3,9 @@ import { audioEngine, keyboardStore, keyStore, midiInput } from './app/services'
 import { loadSettings, saveSettings, type Settings } from './app/settings'
 import type { EngineStatus } from './audio/audioEngine'
 import type { MidiAccessState } from './midi/midiInput'
+import { NOTATION_STYLES } from './core/theory/chordTemplates'
 import { ChordDisplay } from './ui/ChordDisplay'
+import { ChordSearch } from './ui/ChordSearch'
 import { KeyboardView } from './ui/KeyboardView'
 import { KeySelector } from './ui/KeySelector'
 
@@ -50,18 +52,32 @@ export default function App() {
       <header className="toolbar">
         <h1>MIDI Chord Viewer</h1>
         <DeviceSelect midi={midi} selectedId={selectedId} onChange={chooseDevice} />
+        <label className="field">
+          記法
+          <select
+            value={settings.notation}
+            onChange={(e) => setSettings((s) => ({ ...s, notation: e.target.value as Settings['notation'] }))}
+          >
+            {NOTATION_STYLES.map((n) => (
+              <option key={n.id} value={n.id}>
+                {n.label}（{n.example}）
+              </option>
+            ))}
+          </select>
+        </label>
         <SoundControls engine={engine} settings={settings} onChange={setSettings} />
       </header>
 
       <main>
         <KeySelector snapshot={key} onChange={(keyMode) => setSettings((s) => ({ ...s, keyMode }))} />
-        <ChordDisplay sounding={keyboard.sounding} keyTonic={key.effective?.tonic ?? null} />
+        <ChordDisplay sounding={keyboard.sounding} keyTonic={key.effective?.tonic ?? null} notation={settings.notation} />
         <div className="keyboard-wrap">
           <KeyboardView sounding={keyboard.sounding} physical={keyboard.physical} keyTonic={key.effective?.tonic ?? null} />
         </div>
         <div className="pedal" data-on={keyboard.sustainDown}>
           サステイン {keyboard.sustainDown ? 'ON' : 'OFF'}
         </div>
+        <ChordSearch keyTonic={key.effective?.tonic ?? null} notation={settings.notation} />
       </main>
 
       <footer>

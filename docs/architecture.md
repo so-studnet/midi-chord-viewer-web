@@ -21,6 +21,8 @@ Web MIDI (MIDIInput.onmidimessage)
 |---|---|
 | `src/core/theory/` | 音名・音程・コードのテンプレートと判定（純粋関数。Java 版の移植） |
 | `src/core/theory/format.ts` `spelling.ts` | 判定結果（ルート・種類・ベース）→ 表示文字列。キーに合わせた ♯/♭、度数表記 |
+| `src/core/theory/chordParser.ts` | コード名（いろいろな記法・度数）→ ルート・種類・ベース |
+| `src/core/theory/chordSpelling.ts` `voicing.ts` | 構成音の音名（音程に合った ♯/♭）、鍵盤に示す音 |
 | `src/core/key/` | キーの自動判定（純粋関数） |
 | `src/core/input/` | `NoteEvent` と MIDI バイト列の変換、鍵盤状態（ペダル込み）の更新（純粋関数） |
 | `src/midi/` | Web MIDI の受け取り口 |
@@ -51,3 +53,9 @@ Java 版との突き合わせテストは「キーなし・ascii」で行い、�
 - Krumhansl–Kessler の長調・短調プロファイルとの相関を 24 キーで計算し、短調の点数は平行長調に合算（大きいほう）して 12 の長調から選ぶ
 - 今のキーより相関が 0.06 以上高いときだけ切り替える（ちらつき防止）
 - `app/keyStore.ts` が MIDI イベントと 250ms ごとの更新で判定を進める。発音の経路には関わらない
+
+## 記法（`chordTemplates.ts`）
+
+各種類は `names: { standard, japanese, jazz }` を持つ。臨時記号は ASCII（# b）で持ち、表示時に ♯♭ に変える。
+入力の読み取りは `canonicalSuffix()` で書き方をそろえてから、全種類・全記法の名前を同じ変換にかけた表と突き合わせる
+（「どの記法の名前からも読み取れる」「名前どうしがぶつからない」をテストで確認）。

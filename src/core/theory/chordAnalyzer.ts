@@ -88,6 +88,7 @@ function findBestApproximateMatch(mask: number): Match | null {
     if ((mask & (1 << root)) === 0) continue
     const rotated = rotate(mask, root)
     for (const t of CHORD_TEMPLATES) {
+      if (!t.approximate) continue
       const matched = bitCount(rotated & t.mask)
       const missing = bitCount(t.mask & ~rotated)
       const extra = bitCount(rotated & ~t.mask)
