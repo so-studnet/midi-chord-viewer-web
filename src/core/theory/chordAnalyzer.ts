@@ -1,16 +1,27 @@
 import { bitCount, CHORD_TEMPLATES, type ChordTemplate } from './chordTemplates'
-import { intervalName } from './intervals'
-import { fullName, pitchClassName, pitchClassOf } from './noteNames'
+import { pitchClassOf } from './noteNames'
 
-export type ChordKind = 'none' | 'singleNote' | 'interval' | 'chord' | 'unresolved'
+/**
+ * 判定結果。表示用の文字列は持たず、部品（ルート・種類・ベース音）だけを返す。
+ * 文字列にするのは format.ts（キーや記法に合わせて書き分ける）。
+ */
+export type ChordResult =
+  | { readonly kind: 'none' }
+  | { readonly kind: 'singleNote'; readonly note: number }
+  | { readonly kind: 'interval'; readonly low: number; readonly high: number }
+  | {
+      readonly kind: 'chord'
+      /** ルートのピッチクラス（0〜11） */
+      readonly root: number
+      readonly template: ChordTemplate
+      /** 最低音のピッチクラス。root と違えば分数コード */
+      readonly bass: number
+      /** 近似候補（完全一致するコードがなかった）なら true */
+      readonly approximate: boolean
+    }
+  | { readonly kind: 'unresolved' }
 
-export interface ChordResult {
-  readonly kind: ChordKind
-  /** 画面に出す文字列 */
-  readonly label: string
-  /** 近似候補（完全一致するコードがなかった）なら true */
-  readonly approximate: boolean
-}
+export type ChordKind = ChordResult['kind']
 
 const APPROXIMATE_MATCH_THRESHOLD = 3
 
@@ -24,32 +35,26 @@ interface Match {
 /**
  * 鳴っている音（MIDI ノート番号）からコードを判定する。
  * Java 版 ChordAnalyzer と同じ結果になるように移植している（tests で突き合わせ済み）。
+ * 表示用の文字列は formatChordName() で作る。
  */
 export function analyzeChord(notes: Iterable<number>): ChordResult {
   const sorted = [...new Set(notes)].sort((a, b) => a - b)
-  if (sorted.length === 0) return { kind: 'none', label: '-', approximate: false }
-  if (sorted.length === 1) return { kind: 'singleNote', label: fullName(sorted[0]), approximate: false }
-  if (sorted.length === 2) {
-    const [low, high] = sorted
-    return {
-      kind: 'interval',
-      label: `${fullName(low)} - ${fullName(high)} (${intervalName(high - low)})`,
-      approximate: false,
-    }
-  }
+  if (sorted.length === 0) return { kind: 'none' }
+  if (sorted.length === 1) return { kind: 'singleNote', note: sorted[0] }
+  if (sorted.length === 2) return { kind: 'interval', low: sorted[0], high: sorted[1] }
 
-  const bass = sorted[0]
+  const bass = pitchClassOf(sorted[0])
   let mask = 0
   for (const n of sorted) mask |= 1 << pitchClassOf(n)
 
-  const exact = findBestExactMatch(mask, pitchClassOf(bass))
-  if (exact) return { kind: 'chord', label: chordLabel(exact.root, exact.template, bass), approximate: false }
+  const exact = findBestExactMatch(mask, bass)
+  if (exact) return { kind: 'chord', root: exact.root, template: exact.template, bass, approximate: false }
 
   const approx = findBestApproximateMatch(mask)
   if (approx && approx.matched >= APPROXIMATE_MATCH_THRESHOLD) {
-    return { kind: 'chord', label: chordLabel(approx.root, approx.template, bass) + '(?)', approximate: true }
+    return { kind: 'chord', root: approx.root, template: approx.template, bass, approximate: true }
   }
-  return { kind: 'unresolved', label: '該当コードなし', approximate: false }
+  return { kind: 'unresolved' }
 }
 
 function rotate(mask: number, root: number): number {
@@ -91,11 +96,4 @@ function findBestApproximateMatch(mask: number): Match | null {
     }
   }
   return best
-}
-
-function chordLabel(root: number, t: ChordTemplate, bass: number): string {
-  let label = pitchClassName(root) + t.suffix
-  const bassPc = pitchClassOf(bass)
-  if (bassPc !== root) label += '/' + pitchClassName(bassPc)
-  return label
 }

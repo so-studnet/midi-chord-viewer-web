@@ -12,6 +12,7 @@
   --sustained: #b9d0ff;
   --sustained-black: #6f8fc9;
   --error: #c4372c;
+  --accent-text: #2459b8;
   color-scheme: light dark;
   font-family: system-ui, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
 }
@@ -25,6 +26,7 @@
     --key-white: #f2f3f5;
     --key-black: #0c0d0f;
     --error: #ff7a6e;
+    --accent-text: #8fb4ff;
   }
 }
 * { box-sizing: border-box; }
@@ -43,10 +45,15 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 .notice { margin: 0; font-size: 14px; }
 .notice.error { color: var(--error); }
 main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 20px; }
-.chord { text-align: center; min-height: 150px; }
+.chord { text-align: center; min-height: 190px; }
+.key-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; font-size: 15px; }
+.key-current strong { font-size: 18px; }
+button { cursor: pointer; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .chord-label { font-size: clamp(48px, 9vw, 96px); font-weight: 700; line-height: 1.15; letter-spacing: 0.01em; }
 .chord.kind-interval .chord-label, .chord.kind-unresolved .chord-label { font-size: clamp(28px, 5vw, 48px); padding-top: 24px; }
 .chord.kind-none .chord-label { color: var(--muted); }
+.chord-degree { font-size: clamp(24px, 4vw, 40px); font-weight: 600; color: var(--accent-text); line-height: 1.2; min-height: 1.2em; }
 .chord-notes { color: var(--muted); font-size: 16px; margin-top: 4px; }
 .keyboard-wrap { width: 100%; max-width: 1300px; overflow-x: auto; }
 .keyboard { width: 100%; min-width: 860px; height: auto; display: block; }
@@ -64,3 +71,4 @@ main { flex: 1; display: flex; flex-direction: column; align-items: center; gap:
 .pedal[data-on='true'] { color: #fff; background: var(--accent); border-color: var(--accent); }
 footer { padding: 10px 20px; font-size: 12px; color: var(--muted); text-align: center; }
 footer a { color: inherit; }
+.acc { font-size: 0.78em; margin: 0 0.02em 0 -0.1em; position: relative; top: -0.08em; }
