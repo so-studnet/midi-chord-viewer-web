@@ -23,6 +23,7 @@ Web MIDI (MIDIInput.onmidimessage)
 | `src/core/theory/format.ts` `spelling.ts` | 判定結果（ルート・種類・ベース）→ 表示文字列。キーに合わせた ♯/♭、度数表記 |
 | `src/core/theory/chordParser.ts` | コード名（いろいろな記法・度数）→ ルート・種類・ベース |
 | `src/core/theory/chordSpelling.ts` `voicing.ts` | 構成音の音名（音程に合った ♯/♭）、鍵盤に示す音 |
+| `src/core/theory/circleOfFifths.ts` | 5 度圏の位置・輪の判定・ダイアトニックの度数・調号・履歴（純粋関数） |
 | `src/core/key/` | キーの自動判定（純粋関数） |
 | `src/core/input/` | `NoteEvent` と MIDI バイト列の変換、鍵盤状態（ペダル込み）の更新（純粋関数） |
 | `src/midi/` | Web MIDI の受け取り口 |

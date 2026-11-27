@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { previewChord } from '../app/services'
 import { parseChordSymbol } from '../core/theory/chordParser'
 import { CHORD_TEMPLATES, type NotationStyle } from '../core/theory/chordTemplates'
@@ -14,11 +13,12 @@ const EXAMPLES = ['B♭m7', 'CM7', 'F♯ø7', 'G7(♭9)', 'C/E', 'IIm7']
 interface Props {
   keyTonic: number | null
   notation: NotationStyle
+  query: string
+  onQueryChange: (query: string) => void
 }
 
 /** コード名（いろいろな記法、度数も可）を入力して、構成音・鍵盤・度数を見る */
-export function ChordSearch({ keyTonic, notation }: Props) {
-  const [query, setQuery] = useState('')
+export function ChordSearch({ keyTonic, notation, query, onQueryChange: setQuery }: Props) {
   const key: Key | null = keyTonic === null ? null : { tonic: keyTonic }
   // 度数で入力したときのキー。未定なら C として扱う
   const degreeKey: Key = key ?? { tonic: 0 }

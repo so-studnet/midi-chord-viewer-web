@@ -92,3 +92,27 @@ footer a { color: inherit; }
 .keyboard-wrap.small { max-width: 760px; }
 .keyboard-wrap.small .keyboard { min-width: 560px; }
 .type-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.top { width: 100%; max-width: 1300px; display: grid; grid-template-columns: 1fr; gap: 12px; align-items: center; }
+@media (min-width: 980px) { .top { grid-template-columns: 1fr 420px; } }
+.top-main { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.top-circle { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.circle { width: 100%; max-width: 420px; height: auto; user-select: none; }
+.circle .sig path { fill: transparent; stroke: none; }
+.circle .sig text { font-size: 11px; fill: var(--muted); }
+.circle .seg { cursor: pointer; }
+.circle .seg path { fill: var(--panel); stroke: var(--border); stroke-width: 1; transition: fill 80ms; }
+.circle .seg.minor path { fill: color-mix(in srgb, var(--panel) 94%, var(--text)); }
+.circle .seg.dim path { fill: color-mix(in srgb, var(--panel) 88%, var(--text)); }
+.circle .seg.in-key path { fill: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+.circle .seg.current path { fill: var(--accent); }
+.circle .seg:hover path { stroke: var(--accent); stroke-width: 2; }
+.circle .seg text.name { font-size: 13px; font-weight: 600; fill: var(--text); pointer-events: none; }
+.circle .seg.minor text.name { font-size: 12px; }
+.circle .seg.dim text.name { font-size: 10px; }
+.circle .seg text.degree { font-size: 9.5px; font-weight: 600; fill: var(--accent-text); pointer-events: none; }
+.circle .seg.current text { fill: #fff; }
+.circle .trail { stroke: #e0662f; stroke-width: 3; stroke-linecap: round; pointer-events: none; }
+.circle .trail-head { fill: #e0662f; }
+.circle .note-dot { fill: var(--search); stroke: var(--panel); stroke-width: 1.5; pointer-events: none; }
+.circle .center-label { font-size: 11px; fill: var(--muted); }
+.circle .center-key { font-size: 15px; font-weight: 700; fill: var(--text); }

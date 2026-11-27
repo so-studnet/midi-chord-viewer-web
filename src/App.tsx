@@ -1,11 +1,15 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { audioEngine, keyboardStore, keyStore, midiInput } from './app/services'
+import { audioEngine, keyboardStore, keyStore, midiInput, previewChord } from './app/services'
 import { loadSettings, saveSettings, type Settings } from './app/settings'
 import type { EngineStatus } from './audio/audioEngine'
 import type { MidiAccessState } from './midi/midiInput'
-import { NOTATION_STYLES } from './core/theory/chordTemplates'
+import { NOTATION_STYLES, templateById } from './core/theory/chordTemplates'
 import { ChordDisplay } from './ui/ChordDisplay'
 import { ChordSearch } from './ui/ChordSearch'
+import { CircleOfFifths } from './ui/CircleOfFifths'
+import { rootAt, type Placement } from './core/theory/circleOfFifths'
+import { chordSymbol } from './core/theory/format'
+import { chordVoicing } from './core/theory/voicing'
 import { KeyboardView } from './ui/KeyboardView'
 import { KeySelector } from './ui/KeySelector'
 
@@ -16,6 +20,8 @@ export default function App() {
   const [midi, setMidi] = useState<MidiAccessState>({ state: 'pending' })
   const [engine, setEngine] = useState<EngineStatus>({ state: 'idle' })
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const keyTonic = key.effective?.tonic ?? null
 
   useEffect(() => midiInput.onState(setMidi), [])
   useEffect(() => audioEngine.onStatus(setEngine), [])
@@ -47,6 +53,16 @@ export default function App() {
     setSettings((s) => ({ ...s, deviceName: name }))
   }
 
+  // 5 度圏のマスを押したら、そのコードを鳴らしてコード検索に入れる
+  const selectSegment = (p: Placement) => {
+    const template = templateById(p.ring === 'major' ? '' : p.ring === 'minor' ? 'm' : 'm7-5')
+    if (!template) return
+    const root = rootAt(p)
+    const key = keyTonic === null ? null : { tonic: keyTonic }
+    setSearchQuery(chordSymbol(root, template, root, { key, notation: settings.notation }))
+    void previewChord(chordVoicing(root, template.mask, root))
+  }
+
   return (
     <div className="app">
       <header className="toolbar">
@@ -69,15 +85,36 @@ export default function App() {
       </header>
 
       <main>
-        <KeySelector snapshot={key} onChange={(keyMode) => setSettings((s) => ({ ...s, keyMode }))} />
-        <ChordDisplay sounding={keyboard.sounding} keyTonic={key.effective?.tonic ?? null} notation={settings.notation} />
+        <div className="top">
+          <div className="top-main">
+            <KeySelector snapshot={key} onChange={(keyMode) => setSettings((s) => ({ ...s, keyMode }))} />
+            <ChordDisplay sounding={keyboard.sounding} keyTonic={keyTonic} notation={settings.notation} />
+          </div>
+          <div className="top-circle">
+            <CircleOfFifths
+              sounding={keyboard.sounding}
+              keyTonic={keyTonic}
+              notation={settings.notation}
+              showNotes={settings.circleNotes}
+              onSelect={selectSegment}
+            />
+            <label className="field muted">
+              <input
+                type="checkbox"
+                checked={settings.circleNotes}
+                onChange={(e) => setSettings((s) => ({ ...s, circleNotes: e.target.checked }))}
+              />
+              弾いている音の位置も表示
+            </label>
+          </div>
+        </div>
         <div className="keyboard-wrap">
-          <KeyboardView sounding={keyboard.sounding} physical={keyboard.physical} keyTonic={key.effective?.tonic ?? null} />
+          <KeyboardView sounding={keyboard.sounding} physical={keyboard.physical} keyTonic={keyTonic} />
         </div>
         <div className="pedal" data-on={keyboard.sustainDown}>
           サステイン {keyboard.sustainDown ? 'ON' : 'OFF'}
         </div>
-        <ChordSearch keyTonic={key.effective?.tonic ?? null} notation={settings.notation} />
+        <ChordSearch keyTonic={keyTonic} notation={settings.notation} query={searchQuery} onQueryChange={setSearchQuery} />
       </main>
 
       <footer>
