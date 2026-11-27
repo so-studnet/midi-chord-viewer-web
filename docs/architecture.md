@@ -20,6 +20,8 @@ Web MIDI (MIDIInput.onmidimessage)
 | 場所 | 役割 |
 |---|---|
 | `src/core/theory/` | 音名・音程・コードのテンプレートと判定（純粋関数。Java 版の移植） |
+| `src/core/theory/format.ts` `spelling.ts` | 判定結果（ルート・種類・ベース）→ 表示文字列。キーに合わせた ♯/♭、度数表記 |
+| `src/core/key/` | キーの自動判定（純粋関数） |
 | `src/core/input/` | `NoteEvent` と MIDI バイト列の変換、鍵盤状態（ペダル込み）の更新（純粋関数） |
 | `src/midi/` | Web MIDI の受け取り口 |
 | `src/audio/` | `AudioEngine` インターフェースと、その実装 `PianoSampler` |
@@ -36,3 +38,16 @@ Web MIDI (MIDIInput.onmidimessage)
 - サンプル冒頭の無音（数 ms）は読み込み時に検出して飛ばす
 - 鍵盤状態は `core/input/keyboardState.ts` を音源の中でも使い、「鳴っている音から外れた音」を止める（ペダルの扱いが画面と一致する）
 - 音源を替えるとき（SoundFont シンセ等）は `AudioEngine` を実装した別クラスを作り、`services.ts` の 1 行を替える
+
+## コード判定と表示の分離
+
+`analyzeChord()` は文字列ではなく部品（ルート・テンプレート・ベース音・近似かどうか）を返す。
+文字列にするのは `format.ts` で、キー（♯/♭ の選択）と記法（`unicode` / `ascii`）を受け取る。
+Java 版との突き合わせテストは「キーなし・ascii」で行い、判定ロジックが変わっていないことを確かめる。
+
+## キーの自動判定（`core/key/keyDetector.ts`）
+
+- ピッチクラスごとに「鳴っていた秒数」＋「弾いた回数×0.3（最低音は +0.3）」を重みとして貯め、半減期 15 秒で減らす
+- Krumhansl–Kessler の長調・短調プロファイルとの相関を 24 キーで計算し、短調の点数は平行長調に合算（大きいほう）して 12 の長調から選ぶ
+- 今のキーより相関が 0.06 以上高いときだけ切り替える（ちらつき防止）
+- `app/keyStore.ts` が MIDI イベントと 250ms ごとの更新で判定を進める。発音の経路には関わらない

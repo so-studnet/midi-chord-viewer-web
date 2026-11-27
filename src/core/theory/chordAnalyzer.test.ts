@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import golden from './__fixtures__/java-golden.json'
 import { analyzeChord } from './chordAnalyzer'
+import { formatChordName } from './format'
+
+/** Java 版と同じ書き方（♯ だけ・ASCII） */
+const javaLabel = (notes: number[]) => formatChordName(analyzeChord(notes), { key: null, style: 'ascii' })
 
 describe('analyzeChord', () => {
   it.each([
@@ -17,18 +21,18 @@ describe('analyzeChord', () => {
     [[55, 59, 62, 65, 68], 'G7(b9)'],
     [[60, 65, 67], 'Csus4'],
   ])('%j → %s', (notes, label) => {
-    expect(analyzeChord(notes).label).toBe(label)
+    expect(javaLabel(notes)).toBe(label)
   })
 
   it('近似候補には (?) を付ける', () => {
     const r = analyzeChord([60, 61, 64, 67])
-    expect(r.approximate).toBe(true)
-    expect(r.label.endsWith('(?)')).toBe(true)
+    expect(r.kind === 'chord' && r.approximate).toBe(true)
+    expect(javaLabel([60, 61, 64, 67]).endsWith('(?)')).toBe(true)
   })
 
   it(`Java 版と同じ結果になる（${golden.length} 通り）`, () => {
     const mismatches = golden
-      .map(({ notes, label }) => ({ notes, expected: label, actual: analyzeChord(notes).label }))
+      .map(({ notes, label }) => ({ notes, expected: label, actual: javaLabel(notes) }))
       .filter((c) => c.expected !== c.actual)
     expect(mismatches).toEqual([])
   })

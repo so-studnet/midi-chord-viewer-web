@@ -1,13 +1,15 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { audioEngine, keyboardStore, midiInput } from './app/services'
+import { audioEngine, keyboardStore, keyStore, midiInput } from './app/services'
 import { loadSettings, saveSettings, type Settings } from './app/settings'
 import type { EngineStatus } from './audio/audioEngine'
 import type { MidiAccessState } from './midi/midiInput'
 import { ChordDisplay } from './ui/ChordDisplay'
 import { KeyboardView } from './ui/KeyboardView'
+import { KeySelector } from './ui/KeySelector'
 
 export default function App() {
   const keyboard = useSyncExternalStore(keyboardStore.subscribe, keyboardStore.getSnapshot)
+  const key = useSyncExternalStore(keyStore.subscribe, keyStore.getSnapshot)
   const [settings, setSettings] = useState<Settings>(loadSettings)
   const [midi, setMidi] = useState<MidiAccessState>({ state: 'pending' })
   const [engine, setEngine] = useState<EngineStatus>({ state: 'idle' })
@@ -33,6 +35,7 @@ export default function App() {
     saveSettings(settings)
     audioEngine.setVolume(settings.volume)
     audioEngine.setEnabled(settings.soundEnabled)
+    keyStore.setMode(settings.keyMode)
   }, [settings])
 
   const chooseDevice = (id: string) => {
@@ -51,9 +54,10 @@ export default function App() {
       </header>
 
       <main>
-        <ChordDisplay sounding={keyboard.sounding} />
+        <KeySelector snapshot={key} onChange={(keyMode) => setSettings((s) => ({ ...s, keyMode }))} />
+        <ChordDisplay sounding={keyboard.sounding} keyTonic={key.effective?.tonic ?? null} />
         <div className="keyboard-wrap">
-          <KeyboardView sounding={keyboard.sounding} physical={keyboard.physical} />
+          <KeyboardView sounding={keyboard.sounding} physical={keyboard.physical} keyTonic={key.effective?.tonic ?? null} />
         </div>
         <div className="pedal" data-on={keyboard.sustainDown}>
           サステイン {keyboard.sustainDown ? 'ON' : 'OFF'}
